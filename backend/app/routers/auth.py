@@ -11,9 +11,12 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserPublic, status_code=201)
 async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
+    # Check if username already exists
     result = await db.execute(select(User).where(User.username == user_in.username))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already taken")
+    
+    # If not exist create new user
     user = User(
         username=user_in.username,
         email=user_in.email,
